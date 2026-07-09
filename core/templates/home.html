@@ -389,33 +389,35 @@ alert("Notifications not supported in this browser.");
 
 
 
-// Convert static match timestamps into client browser local timezone
+// Converts API timestamps cleanly into localized viewer time
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('.match-time-zone').forEach(element => {
-        const rawDateStr = element.getAttribute('data-api-date'); // Format: "MM/DD/YYYY HH:MM"
+        const rawDateStr = element.getAttribute('data-api-date'); 
         if (!rawDateStr) return;
 
         try {
-            // Split date and time components
+            // Raw API template format: "MM/DD/YYYY HH:MM"
             const [datePart, timePart] = rawDateStr.split(' ');
             const [month, day, year] = datePart.split('/');
             const [hours, minutes] = timePart.split(':');
 
-            // Parse as explicit UTC values to prevent arbitrary offset shifts
-            const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+            // Format directly into an ISO format containing the API source's offset (+03:30)
+            // This allows the browser to pinpoint exactly when the game happens globally
+            const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00+03:30`;
+            const localDate = new Date(isoString);
 
-            // Format date string to match user's local standard settings
-            const localDateString = utcDate.toLocaleString(undefined, {
+            // Print the humanized timezone translation relative to Malawian device context
+            const localDateString = localDate.toLocaleString(undefined, {
                 weekday: 'short',
                 month: 'short', 
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: true
             });
 
             element.innerHTML = `📅 ${localDateString}`;
         } catch (e) {
-            // Fallback display format if parsing errors out
             element.innerHTML = `📅 ${rawDateStr}`;
         }
     });
