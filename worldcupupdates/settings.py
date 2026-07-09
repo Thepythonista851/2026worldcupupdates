@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-vv9lh+xfyw1inffepr()_y#!b2(ifoen=jyf1sd5xwv5j$k%=p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "worldcup26-live-2ofx.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # Application definition
