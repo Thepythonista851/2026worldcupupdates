@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>WC26 Live</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body{
+    background:#15803d;
+}
+
+.match-card{
+    transition:.25s ease;
+}
+
+.match-card:active{
+    transform:scale(.97);
+}
+
+.live-dot{
+    animation:bounce 1s infinite;
+}
+
+@keyframes bounce{
+    50%{
+        transform:scale(1.5);
+        opacity:.5;
+    }
+}
+</style>
+
+</head>
+
+<body class="min-h-screen text-green-950">
+
+<div class="max-w-md mx-auto px-4 py-5 pb-10">
+
+<!-- HEADER -->
+<div class="bg-yellow-400 rounded-3xl p-4 shadow-[0_6px_0_#166534] flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+        <div class="bg-white w-12 h-12 rounded-2xl flex items-center justify-center text-3xl shadow">🏆</div>
+        <div>
+            <h1 class="font-black text-2xl uppercase">WC26 Live</h1>
+            <p class="text-xs font-bold text-green-800">World Cup Updates</p>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+        <!-- Notification Button -->
+        <button onclick="enableNotifications()" 
+                class="bg-green-700 text-white w-10 h-10 rounded-full flex items-center justify-center shadow hover:bg-green-600">
+            <i class="fas fa-bell"></i>
+        </button>
+        
+        <a href="/about" class="bg-green-700 text-white w-10 h-10 rounded-full flex items-center justify-center shadow">
+            <i class="fa-solid fa-info"></i>
+        </a>
+    </div>
+</div>
+
+<!-- MATCH LIST -->
+<div class="space-y-5">
+    {% for m in matches %}
+    <div class="match-card bg-white rounded-3xl p-5 border-4 border-green-900 shadow-[0_7px_0_#14532d]">
+        <!-- TOP -->
+        <div class="flex justify-between items-center mb-5">
+            <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-black">{{m.group|default:"WORLD CUP"}}</span>
+
+            <span class="px-3 py-1 rounded-full text-xs font-black
+                {% if m.time_elapsed == 'finished' %}bg-blue-500 text-white
+                {% elif m.time_elapsed != 'notstarted' %}bg-red-500 text-white
+                {% else %}bg-yellow-400 text-green-900{% endif %}">
+                {% if m.time_elapsed == 'notstarted' %}UPCOMING
+                {% elif m.time_elapsed == 'finished' %}FINISHED
+                {% else %}
+                    <span class="inline-block w-2 h-2 bg-white rounded-full live-dot mr-1"></span>
+                    LIVE {{m.time_elapsed}}
+                {% endif %}
+            </span>
+        </div>
+
+        <!-- TEAMS -->
+        <div class="flex items-center justify-between">
+            <!-- HOME -->
+            <div class="text-center w-1/3">
+                <div class="bg-green-100 rounded-full w-14 h-14 mx-auto flex items-center justify-center text-2xl mb-2">⚽</div>
+                <p class="font-black text-sm truncate">{{m.home_team_name_en}}</p>
+            </div>
+
+            <!-- SCORE -->
+            <div class="text-center">
+                <div class="bg-green-700 text-white rounded-2xl px-4 py-2">
+                    <p class="text-4xl font-black">
+                        {{m.home_score|default:0}} - {{m.away_score|default:0}}
+                    </p>
+                </div>
+                <p class="font-bold text-xs mt-2 text-green-700">VS</p>
+            </div>
+
+            <!-- AWAY -->
+            <div class="text-center w-1/3">
+                <div class="bg-green-100 rounded-full w-14 h-14 mx-auto flex items-center justify-center text-2xl mb-2">⚽</div>
+                <p class="font-black text-sm truncate">{{m.away_team_name_en}}</p>
+            </div>
+        </div>
+
+        <!-- DATE -->
+        <div class="mt-5 bg-green-100 rounded-xl text-center py-2 font-bold text-xs">
+            📅 {{m.local_date}}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="text-center py-8 text-green-900 text-xs font-medium">
+    Made with ❤️ by <span class="font-bold">JoshiiCodes</span>
+</footer>
+
+<script>
+function enableNotifications() {
+    if ("Notification" in window) {
+        Notification.requestPermission().then(perm => {
+            if (perm === "granted") {
+                new Notification("WC26 Live", { 
+                    body: "You will receive goal and match alerts! ⚽" 
+                });
+            }
+        });
+    } else {
+        alert("Notifications not supported in this browser.");
+    }
+}
+
+setTimeout(()=>{ location.reload(); },25000);
+</script>
+
+</body>
+</html>
