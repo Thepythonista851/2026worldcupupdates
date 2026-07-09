@@ -84,8 +84,6 @@ body{
 <div class="max-w-md mx-auto px-4 py-5 pb-10">
 
 
-<!-- HEADER -->
-
 <div class="africa-header rounded-3xl p-4 shadow-[0_7px_0_#14532d] flex items-center justify-between mb-6">
 
 
@@ -115,8 +113,6 @@ body{
     <div class="flex items-center gap-3">
 
 
-        <!-- Notifications -->
-
         <button onclick="enableNotifications()" 
         class="africa-button text-white w-10 h-10 rounded-full flex items-center justify-center shadow">
 
@@ -124,8 +120,6 @@ body{
 
         </button>
 
-
-        <!-- About -->
 
         <a href="/about"
         class="africa-button text-white w-10 h-10 rounded-full flex items-center justify-center shadow">
@@ -143,9 +137,6 @@ body{
 
 
 
-<!-- MATCH LIST -->
-
-
 <div class="space-y-5">
 
 
@@ -154,8 +145,6 @@ body{
 
 <div class="match-card bg-white rounded-3xl p-5 border-4 border-green-900 shadow-[0_7px_0_#14532d]">
 
-
-<!-- TOP -->
 
 <div class="flex justify-between items-center mb-5">
 
@@ -216,21 +205,16 @@ LIVE {{m.time_elapsed}}
 
 
 
-<!-- TEAMS -->
-
-
 <div class="flex items-center justify-between">
 
 
 
-<!-- HOME TEAM -->
-
 <div class="text-center w-1/3">
 
 
-<div class="bg-green-100 rounded-full w-14 h-14 mx-auto flex items-center justify-center text-2xl mb-2">
+<div class="bg-green-100 rounded-full w-14 h-14 mx-auto flex items-center justify-center overflow-hidden border-2 border-green-900 shadow mb-2">
 
-⚽
+    <img src="https://flagcdn.com/w160/{{ m.home_flag }}.png" alt="{{ m.home_team_name_en }}" class="w-full h-full object-cover">
 
 </div>
 
@@ -246,9 +230,6 @@ LIVE {{m.time_elapsed}}
 
 
 
-
-
-<!-- SCORE -->
 
 
 <div class="text-center">
@@ -282,15 +263,12 @@ VS
 
 
 
-<!-- AWAY TEAM -->
-
-
 <div class="text-center w-1/3">
 
 
-<div class="bg-green-100 rounded-full w-14 w-14 h-14 mx-auto flex items-center justify-center text-2xl mb-2">
+<div class="bg-green-100 rounded-full w-14 h-14 mx-auto flex items-center justify-center overflow-hidden border-2 border-green-900 shadow mb-2">
 
-⚽
+    <img src="https://flagcdn.com/w160/{{ m.away_flag }}.png" alt="{{ m.away_team_name_en }}" class="w-full h-full object-cover">
 
 </div>
 
@@ -312,14 +290,10 @@ VS
 
 
 
-<!-- DATE -->
+<div class="match-time-zone mt-5 bg-yellow-100 border-2 border-yellow-400 rounded-xl text-center py-2 font-bold text-xs" 
+     data-api-date="{{ m.local_date }}">
 
-
-<div class="mt-5 bg-yellow-100 border-2 border-yellow-400 rounded-xl text-center py-2 font-bold text-xs">
-
-
-📅 {{m.local_date}}
-
+    📅 Loading local time...
 
 </div>
 
@@ -351,9 +325,6 @@ VS
 
 
 
-
-
-<!-- FOOTER -->
 
 
 <footer class="footer-box text-center py-8 text-xs font-medium">
@@ -417,6 +388,38 @@ alert("Notifications not supported in this browser.");
 }
 
 
+
+// Convert static match timestamps into client browser local timezone
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.match-time-zone').forEach(element => {
+        const rawDateStr = element.getAttribute('data-api-date'); // Format: "MM/DD/YYYY HH:MM"
+        if (!rawDateStr) return;
+
+        try {
+            // Split date and time components
+            const [datePart, timePart] = rawDateStr.split(' ');
+            const [month, day, year] = datePart.split('/');
+            const [hours, minutes] = timePart.split(':');
+
+            // Parse as explicit UTC values to prevent arbitrary offset shifts
+            const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+
+            // Format date string to match user's local standard settings
+            const localDateString = utcDate.toLocaleString(undefined, {
+                weekday: 'short',
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            element.innerHTML = `📅 ${localDateString}`;
+        } catch (e) {
+            // Fallback display format if parsing errors out
+            element.innerHTML = `📅 ${rawDateStr}`;
+        }
+    });
+});
 
 
 // Auto refresh every 25 seconds
