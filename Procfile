@@ -1,0 +1,1 @@
+web: gunicorn worldcupupdates.wsgi --log-file -
