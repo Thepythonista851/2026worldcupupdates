@@ -396,17 +396,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!rawDateStr) return;
 
         try {
-            // Raw API template format: "MM/DD/YYYY HH:MM"
+            // Raw API format: "MM/DD/YYYY HH:MM"
             const [datePart, timePart] = rawDateStr.split(' ');
             const [month, day, year] = datePart.split('/');
             const [hours, minutes] = timePart.split(':');
 
-            // Format directly into an ISO format containing the API source's offset (+03:30)
-            // This allows the browser to pinpoint exactly when the game happens globally
-            const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00+03:30`;
+            // Treat the incoming string directly as a strict UTC baseline (Z)
+            const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00Z`;
             const localDate = new Date(isoString);
 
-            // Print the humanized timezone translation relative to Malawian device context
+            // Automatically format according to user's system timezone (e.g., Malawi CAT)
             const localDateString = localDate.toLocaleString(undefined, {
                 weekday: 'short',
                 month: 'short', 
