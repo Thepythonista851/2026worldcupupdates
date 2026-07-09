@@ -389,23 +389,27 @@ alert("Notifications not supported in this browser.");
 
 
 
-// Converts API timestamps cleanly into localized viewer time
+// Fixed date normalizer to explicitly capture browser local timezone
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('.match-time-zone').forEach(element => {
         const rawDateStr = element.getAttribute('data-api-date'); 
         if (!rawDateStr) return;
 
         try {
-            // Raw API format: "MM/DD/YYYY HH:MM"
-            const [datePart, timePart] = rawDateStr.split(' ');
-            const [month, day, year] = datePart.split('/');
-            const [hours, minutes] = timePart.split(':');
-
-            // Treat the incoming string directly as a strict UTC baseline (Z)
-            const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00Z`;
+            // Clean up backslashes if the API wraps paths, replace spaces with standard 'T'
+            let normalizedStr = rawDateStr.replace(/\//g, '-').trim();
+            
+            // Format layout into a standard string pattern: "MM-DD-YYYY HH:MM" -> "YYYY-MM-DDTHH:MM:00Z"
+            const parts = normalizedStr.split(' ');
+            const dateParts = parts[0].split('-');
+            const timePart = parts[1];
+            
+            // Reassemble strictly as Year-Month-Day for cross-browser standard support
+            const isoString = `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}T${timePart}:00Z`;
+            
             const localDate = new Date(isoString);
 
-            // Automatically format according to user's system timezone (e.g., Malawi CAT)
+            // Print the humanized localized string directly matching client device timezone context
             const localDateString = localDate.toLocaleString(undefined, {
                 weekday: 'short',
                 month: 'short', 
@@ -417,6 +421,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             element.innerHTML = `📅 ${localDateString}`;
         } catch (e) {
+            // Last-resort fallback so text never disappears completely
             element.innerHTML = `📅 ${rawDateStr}`;
         }
     });
