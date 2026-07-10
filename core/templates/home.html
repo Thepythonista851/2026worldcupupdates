@@ -291,7 +291,7 @@ VS
 
 
 <div class="match-time-zone mt-5 bg-yellow-100 border-2 border-yellow-400 rounded-xl text-center py-2 font-bold text-xs" 
-     data-api-date="{{ m.local_date }}">
+     data-api-date="{{ m.kickoff_utc|default:'' }}">
 
     📅 Loading local time...
 
@@ -389,30 +389,28 @@ alert("Notifications not supported in this browser.");
 
 
 
-// Fixed date normalizer to explicitly capture browser local timezone
+// kickoff_utc is now a real, correctly-converted UTC ISO string
+// (e.g. "2026-06-11T19:00:00Z") built server-side in views.py, so the
+// browser just needs to localize it — no manual string parsing needed.
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('.match-time-zone').forEach(element => {
-        const rawDateStr = element.getAttribute('data-api-date'); 
-        if (!rawDateStr) return;
+        const rawDateStr = element.getAttribute('data-api-date');
+
+        if (!rawDateStr) {
+            element.innerHTML = `📅 Time TBD`;
+            return;
+        }
 
         try {
-            // Clean up backslashes if the API wraps paths, replace spaces with standard 'T'
-            let normalizedStr = rawDateStr.replace(/\//g, '-').trim();
-            
-            // Format layout into a standard string pattern: "MM-DD-YYYY HH:MM" -> "YYYY-MM-DDTHH:MM:00Z"
-            const parts = normalizedStr.split(' ');
-            const dateParts = parts[0].split('-');
-            const timePart = parts[1];
-            
-            // Reassemble strictly as Year-Month-Day for cross-browser standard support
-            const isoString = `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}T${timePart}:00Z`;
-            
-            const localDate = new Date(isoString);
+            const localDate = new Date(rawDateStr);
 
-            // Print the humanized localized string directly matching client device timezone context
+            if (isNaN(localDate.getTime())) {
+                throw new Error("Invalid date");
+            }
+
             const localDateString = localDate.toLocaleString(undefined, {
                 weekday: 'short',
-                month: 'short', 
+                month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit',
@@ -421,8 +419,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             element.innerHTML = `📅 ${localDateString}`;
         } catch (e) {
-            // Last-resort fallback so text never disappears completely
-            element.innerHTML = `📅 ${rawDateStr}`;
+            element.innerHTML = `📅 Time TBD`;
         }
     });
 });
